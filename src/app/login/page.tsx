@@ -16,7 +16,7 @@ export default function LoginPage() {
         <Box width="100%">
           <LoginForm />
           <Typography textAlign="center" sx={{ mt: 2 }}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link component={NextLink} href="/signup" color="primary">
               Sign Up
             </Link>
