@@ -1,0 +1,33 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from '@/context/AuthContext'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import { theme } from '@/config/theme'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'Todo App',
+  description: 'Full-stack Todo application with authentication',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
