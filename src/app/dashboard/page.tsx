@@ -38,7 +38,10 @@ async function getUserAndTodos() {
   })
 
   return {
-    user,
+    user: {
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+    },
     todos: todos.map((todo: any) => ({
       ...todo,
       dueDate: todo.dueDate?.toISOString() || null,

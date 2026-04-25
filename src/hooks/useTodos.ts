@@ -11,7 +11,6 @@ export function useTodos() {
 
   const fetchTodos = useCallback(async () => {
     try {
-      setLoading(true)
       const response = await axios.get('/api/todos')
       setTodos(response.data)
       setError(null)
@@ -66,7 +65,12 @@ export function useTodos() {
   }, [])
 
   useEffect(() => {
-    fetchTodos()
+    let ignore = false
+    const init = async () => {
+      await fetchTodos()
+    }
+    init()
+    return () => { ignore = true }
   }, [fetchTodos])
 
   return {

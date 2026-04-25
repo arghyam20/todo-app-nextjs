@@ -2,11 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ['bcryptjs', 'mysql2', 'prisma'],
-  },
+  serverExternalPackages: ['bcryptjs', 'mysql2', 'prisma'],
 }
 
 export default nextConfig

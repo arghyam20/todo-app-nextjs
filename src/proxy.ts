@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/utils/auth'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get('token')?.value
   const isAuthPage = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup'
   const isProtectedPage = request.nextUrl.pathname === '/dashboard' || request.nextUrl.pathname === '/profile'

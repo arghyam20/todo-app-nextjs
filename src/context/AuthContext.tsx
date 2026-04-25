@@ -13,19 +13,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter()
 
     useEffect(() => {
-        checkAuth()
-    }, [])
-
-    const checkAuth = async () => {
-        try {
-            const response = await axios.get('/api/auth/me')
-            setUser(response.data.user)
-        } catch (error) {
-            setUser(null)
-        } finally {
-            setLoading(false)
+        let ignore = false
+        const checkAuth = async () => {
+            try {
+                const response = await axios.get('/api/auth/me')
+                if (!ignore) setUser(response.data.user)
+            } catch (error) {
+                if (!ignore) setUser(null)
+            } finally {
+                if (!ignore) setLoading(false)
+            }
         }
-    }
+
+        checkAuth()
+        return () => { ignore = true }
+    }, [])
 
     const login = async (email: string, password: string) => {
         const response = await axios.post('/api/auth/login', { email, password })

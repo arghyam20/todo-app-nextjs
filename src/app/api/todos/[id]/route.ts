@@ -5,8 +5,9 @@ import { updateTodoSchema } from '@/validations/todo'
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const userId = verifyAuth(req)
     
@@ -17,7 +18,7 @@ export async function PUT(
       )
     }
 
-    const todoId = parseInt(params.id)
+    const todoId = parseInt(id)
     const body = await req.json()
     
     const { error } = updateTodoSchema.validate(body)
@@ -64,8 +65,9 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const userId = verifyAuth(req)
     
@@ -76,7 +78,7 @@ export async function DELETE(
       )
     }
 
-    const todoId = parseInt(params.id)
+    const todoId = parseInt(id)
 
     const todo = await prisma.todo.findFirst({
       where: {
@@ -111,8 +113,9 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const userId = verifyAuth(req)
     
@@ -123,7 +126,7 @@ export async function PATCH(
       )
     }
 
-    const todoId = parseInt(params.id)
+    const todoId = parseInt(id)
     const body = await req.json()
 
     const todo = await prisma.todo.findFirst({

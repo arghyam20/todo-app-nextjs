@@ -69,7 +69,11 @@ export default function DashboardClient({ initialUser, initialTodos }: Dashboard
         description: '',
         dueDate: null as Date | null,
     })
-    const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' as const })
+    const [alert, setAlert] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' | 'warning' }>({
+        open: false,
+        message: '',
+        severity: 'success'
+    })
 
     const {
         todos,
