@@ -3,7 +3,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  todos     Todo[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  todos     Todo[]
 }
