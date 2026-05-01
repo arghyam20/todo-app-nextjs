@@ -41,6 +41,9 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormData) => {
     try {
       setError('')
+      console.log('1111111111111111');
+
+
       await signup(data.name, data.email, data.password)
       router.push('/dashboard')
     } catch (err: any) {

@@ -24,9 +24,11 @@ async function getUser() {
             id: true,
             name: true,
             email: true,
+            image: true,
             createdAt: true,
             updatedAt: true,
         },
+
     })
 
     if (!user) {

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/config/database'
-import { signupSchema } from '@/validations/user'
+import { signupBaseSchema } from '@/validations/user'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
 
-    const { error } = signupSchema.validate(body)
+    const { error } = signupBaseSchema.validate(body)
+
     if (error) {
       return NextResponse.json(
         { error: error.details[0].message },
