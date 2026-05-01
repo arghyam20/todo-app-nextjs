@@ -2,9 +2,11 @@ export interface User {
   id: number
   name: string
   email: string
+  image?: string | null
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
+
 
 export interface LoginCredentials {
   email: string

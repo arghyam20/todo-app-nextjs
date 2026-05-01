@@ -78,12 +78,12 @@ export default function DashboardClient({ initialUser, initialTodos }: Dashboard
     const {
         todos,
         loading,
-        error,
+        error: todoError,
         addTodo,
         updateTodo,
         toggleComplete,
         deleteTodo,
-    } = useTodos()
+    } = useTodos(initialTodos)
 
     const showAlert = (message: string, severity: 'success' | 'error' = 'success') => {
         setAlert({ open: true, message, severity })
@@ -115,6 +115,7 @@ export default function DashboardClient({ initialUser, initialTodos }: Dashboard
             await updateTodo(editingTodo.id, {
                 title: formData.title,
                 description: formData.description,
+                completed: editingTodo.completed,
                 dueDate: formData.dueDate?.toISOString(),
             })
             showAlert('Todo updated successfully')
@@ -159,8 +160,8 @@ export default function DashboardClient({ initialUser, initialTodos }: Dashboard
 
                 <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
                     <ErrorAlert
-                        open={!!error}
-                        message={error || ''}
+                        open={!!todoError}
+                        message={todoError || ''}
                         onClose={() => { }}
                     />
 

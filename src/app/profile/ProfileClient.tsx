@@ -16,29 +16,24 @@ import {
 import { Person as PersonIcon, PhotoCamera as PhotoCameraIcon } from '@mui/icons-material'
 import { useAuth } from '@/hooks/useAuth'
 import { updateProfileSchema } from '@/validations/user'
+import { updateProfileAction, uploadImageAction } from '@/actions/auth'
 import Navbar from '@/components/layout/Navbar'
-import axios from 'axios'
 import { styled } from '@mui/material/styles'
+import { useEffect } from 'react'
 
 const Input = styled('input')({
     display: 'none',
 })
 
-interface User {
-    id: number
-    name: string
-    email: string
-    image?: string | null
-    createdAt: string
-    updatedAt: string
-}
+import { User } from '@/types'
 
 interface ProfileClientProps {
     initialUser: User
 }
 
+
 export default function ProfileClient({ initialUser }: ProfileClientProps) {
-    const { updateUser } = useAuth()
+    const { updateUser: updateAuthUser } = useAuth()
     const [user, setUser] = useState(initialUser)
     const [isEditing, setIsEditing] = useState(false)
     const [uploading, setUploading] = useState(false)
@@ -48,16 +43,31 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     })
     const [message, setMessage] = useState({ text: '', type: 'success' as 'success' | 'error' })
 
+    // Sync state when props change
+    useEffect(() => {
+        setUser(initialUser)
+        setFormData({ name: initialUser.name, email: initialUser.email })
+    }, [initialUser])
+
     const handleUpdate = async () => {
         try {
-            const response = await axios.put('/api/auth/me', formData)
-            setUser(response.data.user)
-            updateUser(response.data.user)
-            setIsEditing(false)
-            setMessage({ text: 'Profile updated successfully!', type: 'success' })
-            setTimeout(() => setMessage({ text: '', type: 'success' }), 3000)
+            const formDataToSubmit = new FormData()
+            formDataToSubmit.append('name', formData.name)
+            formDataToSubmit.append('email', formData.email)
+            
+            const result = await updateProfileAction(formDataToSubmit)
+            if (result.success) {
+                const updatedUser = { ...user, ...formData }
+                setUser(updatedUser)
+                updateAuthUser(updatedUser)
+                setIsEditing(false)
+                setMessage({ text: 'Profile updated successfully!', type: 'success' })
+                setTimeout(() => setMessage({ text: '', type: 'success' }), 3000)
+            } else {
+                setMessage({ text: result.error || 'Update failed', type: 'error' })
+            }
         } catch (err: any) {
-            setMessage({ text: err.response?.data?.error || 'Failed to update profile', type: 'error' })
+            setMessage({ text: 'An unexpected error occurred', type: 'error' })
         }
     }
 
@@ -65,26 +75,26 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
         const file = event.target.files?.[0]
         if (!file) return
 
-        const formData = new FormData()
-        formData.append('file', file)
+        const formDataToSubmit = new FormData()
+        formDataToSubmit.append('file', file)
 
         setUploading(true)
         try {
-            const response = await axios.post('/api/auth/me/image', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
-            setUser(response.data.user)
-            updateUser(response.data.user)
-            setMessage({ text: 'Profile image updated!', type: 'success' })
-            setTimeout(() => setMessage({ text: '', type: 'success' }), 3000)
+            const result = await uploadImageAction(formDataToSubmit)
+            if (result.success) {
+                setMessage({ text: 'Profile image updated!', type: 'success' })
+                setTimeout(() => setMessage({ text: '', type: 'success' }), 3000)
+                // Note: initialUser will be updated by revalidatePath on server
+            } else {
+                setMessage({ text: result.error || 'Upload failed', type: 'error' })
+            }
         } catch (err: any) {
-            setMessage({ text: err.response?.data?.error || 'Failed to upload image', type: 'error' })
+            setMessage({ text: 'Failed to upload image', type: 'error' })
         } finally {
             setUploading(false)
         }
     }
+
 
     return (
         <Box>

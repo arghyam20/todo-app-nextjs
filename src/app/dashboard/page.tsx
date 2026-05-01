@@ -1,57 +1,47 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/config/database'
-import { verifyToken } from '@/utils/auth'
+import { prisma } from '@/lib/prisma'
+import jwt from 'jsonwebtoken'
 import DashboardClient from './DashboardClient'
 
-async function getUserAndTodos() {
+async function getAuth() {
   const cookieStore = await cookies()
   const token = cookieStore.get('token')?.value
+  if (!token) redirect('/login')
 
-  if (!token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number }
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, name: true, email: true, createdAt: true },
+    })
+    
+    if (!user) redirect('/login')
+
+    const todos = await prisma.todo.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    // Prepare data for client component
+    return {
+      user: {
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+      },
+      todos: todos.map(todo => ({
+        ...todo,
+        dueDate: todo.dueDate?.toISOString() || null,
+        createdAt: todo.createdAt.toISOString(),
+        updatedAt: todo.updatedAt.toISOString(),
+      })),
+    }
+  } catch (error) {
     redirect('/login')
-  }
-
-  const userId = await verifyToken(token)
-
-  if (!userId) {
-    redirect('/login')
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-    },
-  })
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const todos = await prisma.todo.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  return {
-    user: {
-      ...user,
-      createdAt: user.createdAt.toISOString(),
-    },
-    todos: todos.map((todo: any) => ({
-      ...todo,
-      dueDate: todo.dueDate?.toISOString() || null,
-      createdAt: todo.createdAt.toISOString(),
-      updatedAt: todo.updatedAt.toISOString(),
-    })),
   }
 }
 
 export default async function DashboardPage() {
-  const { user, todos } = await getUserAndTodos()
-  return <DashboardClient initialUser={user} initialTodos={todos} />
+  const data = await getAuth()
+  return <DashboardClient initialUser={data.user} initialTodos={data.todos} />
 }

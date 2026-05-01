@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { joiResolver } from '@hookform/resolvers/joi'
 import { TextField, Button, Alert, Paper, Typography, Box } from '@mui/material'
 import { loginSchema } from '@/validations/user'
-import { useAuth } from '@/hooks/useAuth'
+import { loginAction } from '@/actions/auth'
 
 interface LoginFormData {
     email: string
@@ -14,7 +14,6 @@ interface LoginFormData {
 
 export default function LoginForm() {
     const [error, setError] = useState('')
-    const { login } = useAuth()
 
     const {
         register,
@@ -27,11 +26,19 @@ export default function LoginForm() {
     const onSubmit = async (data: LoginFormData) => {
         try {
             setError('')
-            await login(data.email, data.password)
+            const formData = new FormData()
+            formData.append('email', data.email)
+            formData.append('password', data.password)
+            
+            const result = await loginAction(formData)
+            if (result?.error) {
+                setError(result.error)
+            }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Login failed')
+            setError('An unexpected error occurred')
         }
     }
+
 
     return (
         <Paper elevation={3} sx={{ p: 4, maxWidth: 400, width: '100%' }}>

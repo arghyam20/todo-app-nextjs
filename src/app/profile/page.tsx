@@ -1,48 +1,35 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/config/database'
-import { verifyToken } from '@/utils/auth'
+import { prisma } from '@/lib/prisma'
+import jwt from 'jsonwebtoken'
 import ProfileClient from './ProfileClient'
 
-async function getUser() {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('token')?.value
+async function getAuth() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('token')?.value
+  if (!token) redirect('/login')
 
-    if (!token) {
-        redirect('/login')
-    }
-
-    const userId = await verifyToken(token)
-
-    if (!userId) {
-        redirect('/login')
-    }
-
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number }
     const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            createdAt: true,
-            updatedAt: true,
-        },
-
+      where: { id: decoded.userId },
+      select: { id: true, name: true, email: true, image: true, createdAt: true },
     })
-
-    if (!user) {
-        redirect('/login')
-    }
+    
+    if (!user) redirect('/login')
 
     return {
+      user: {
         ...user,
         createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
+      }
     }
+  } catch (error) {
+    redirect('/login')
+  }
 }
 
 export default async function ProfilePage() {
-    const user = await getUser()
-    return <ProfileClient initialUser={user} />
+  const data = await getAuth()
+  return <ProfileClient initialUser={data.user} />
 }

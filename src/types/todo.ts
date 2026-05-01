@@ -4,7 +4,8 @@ export interface Todo {
   description: string | null
   completed: boolean
   dueDate: string | null
-  userId: number
+  userId?: number
   createdAt: string
-  updatedAt: string
+  updatedAt?: string
 }
+

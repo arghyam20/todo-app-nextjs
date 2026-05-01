@@ -16,7 +16,7 @@ import {
 } from '@mui/material'
 import NextLink from 'next/link'
 import { signupSchema } from '@/validations/user'
-import { useAuth } from '@/hooks/useAuth'
+import { signupAction } from '@/actions/auth'
 
 interface SignupFormData {
   name: string
@@ -27,8 +27,6 @@ interface SignupFormData {
 
 export default function SignupPage() {
   const [error, setError] = useState('')
-  const { signup } = useAuth()
-  const router = useRouter()
 
   const {
     register,
@@ -41,15 +39,20 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupFormData) => {
     try {
       setError('')
-      console.log('1111111111111111');
-
-
-      await signup(data.name, data.email, data.password)
-      router.push('/dashboard')
+      const formData = new FormData()
+      formData.append('name', data.name)
+      formData.append('email', data.email)
+      formData.append('password', data.password)
+      
+      const result = await signupAction(formData)
+      if (result?.error) {
+        setError(result.error)
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed')
+      setError('An unexpected error occurred')
     }
   }
+
 
   return (
     <Container maxWidth="sm">

@@ -1,49 +1,31 @@
 'use client'
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
 import { User, AuthContextType } from '@/types'
+import { logoutAction } from '@/actions/auth'
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null)
-    const [loading, setLoading] = useState(true)
-    const router = useRouter()
+export function AuthProvider({ children, initialUser }: { children: ReactNode; initialUser: User | null }) {
+    const [user, setUser] = useState<User | null>(initialUser)
+    const [loading, setLoading] = useState(false)
 
+    // Sync with server-provided user
     useEffect(() => {
-        let ignore = false
-        const checkAuth = async () => {
-            try {
-                const response = await axios.get('/api/auth/me')
-                if (!ignore) setUser(response.data.user)
-            } catch (error) {
-                if (!ignore) setUser(null)
-            } finally {
-                if (!ignore) setLoading(false)
-            }
-        }
+        setUser(initialUser)
+    }, [initialUser])
 
-        checkAuth()
-        return () => { ignore = true }
-    }, [])
-
-    const login = async (email: string, password: string) => {
-        const response = await axios.post('/api/auth/login', { email, password })
-        setUser(response.data.user)
-        router.push('/dashboard')
+    const login = async () => {
+        // Redirection and state are handled by Server Actions
     }
 
-    const signup = async (name: string, email: string, password: string) => {
-        await axios.post('/api/auth/signup', { name, email, password })
-        await login(email, password)
+    const signup = async () => {
+        // Redirection and state are handled by Server Actions
     }
 
     const logout = async () => {
-        await axios.post('/api/auth/logout')
+        await logoutAction()
         setUser(null)
-        router.push('/login')
     }
 
     const updateUser = (updatedUser: User) => {
@@ -51,7 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, signup, logout, updateUser }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            loading, 
+            login: () => Promise.resolve(), // Legacy support
+            signup: () => Promise.resolve(), // Legacy support
+            logout, 
+            updateUser 
+        }}>
             {children}
         </AuthContext.Provider>
     )
