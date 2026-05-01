@@ -43,11 +43,6 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     })
     const [message, setMessage] = useState({ text: '', type: 'success' as 'success' | 'error' })
 
-    // Sync state when props change
-    useEffect(() => {
-        setUser(initialUser)
-        setFormData({ name: initialUser.name, email: initialUser.email })
-    }, [initialUser])
 
     const handleUpdate = async () => {
         try {

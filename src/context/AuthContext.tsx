@@ -10,10 +10,6 @@ export function AuthProvider({ children, initialUser }: { children: ReactNode; i
     const [user, setUser] = useState<User | null>(initialUser)
     const [loading, setLoading] = useState(false)
 
-    // Sync with server-provided user
-    useEffect(() => {
-        setUser(initialUser)
-    }, [initialUser])
 
     const login = async () => {
         // Redirection and state are handled by Server Actions

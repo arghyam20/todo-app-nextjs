@@ -43,5 +43,7 @@ async function getAuth() {
 
 export default async function DashboardPage() {
   const data = await getAuth()
-  return <DashboardClient initialUser={data.user} initialTodos={data.todos} />
+  // Use a key to force re-render when data changes (e.g. after revalidatePath)
+  const key = `${data.user.id}-${data.todos.length}-${data.todos[0]?.updatedAt || ''}`
+  return <DashboardClient key={key} initialUser={data.user} initialTodos={data.todos} />
 }

@@ -31,5 +31,6 @@ async function getAuth() {
 
 export default async function ProfilePage() {
   const data = await getAuth()
-  return <ProfileClient initialUser={data.user} />
+  const key = `${data.user.id}-${data.user.name}-${data.user.email}-${data.user.image || ''}`
+  return <ProfileClient key={key} initialUser={data.user} />
 }

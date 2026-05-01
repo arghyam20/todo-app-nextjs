@@ -13,10 +13,6 @@ export function useTodos(initialTodos: Todo[]) {
   const [todos, setTodos] = useState<Todo[]>(initialTodos)
   const [error, setError] = useState<string | null>(null)
 
-  // Sync state when initialTodos changes (due to revalidatePath)
-  useEffect(() => {
-    setTodos(initialTodos)
-  }, [initialTodos])
 
   const addTodo = useCallback(async (data: { title: string; description?: string; dueDate?: string }) => {
     const result = await addTodoAction(data)
